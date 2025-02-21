@@ -1,0 +1,62 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - DATABASE_HOST=db
+      - DATABASE_URL=jdbc:postgresql://db:5432/document_service
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=postgres
+      - POSTGRES_PASSWORD=postgres
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: on-failure
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  db:
+    image: postgres:14
+    container_name: ${COMPOSE_PROJECT_NAME:-document-control-system}_db
+    environment:
+      - POSTGRES_DB=document_service
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d document_service"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      - app
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
+    depends_on:
+      - prometheus 
+
+volumes:
+  postgres_data: 
