@@ -129,10 +129,10 @@ Build a Docker image with docker build -t document-service .
 
 Run the container with:
 docker run -p 8080:8080 \
-  -e DATABASE_URL=jdbc:postgresql://host.docker.internal:5432/document_service \
+  -e DATABASE_URL=jdbc:postgresql://host.docker.internal:5432/document_control \
   -e DATABASE_USER=postgres \
   -e DATABASE_PASSWORD=postgres \
-  document-service
+  document-control
 
 
 You can now:
@@ -177,3 +177,7 @@ Add canary deployment support
 Add blue-green deployment support
 Add monitoring alerts for rollbacks
 
+docker exec -it document-control-system_db psql -U postgres
+\l
+\c document_control
+\dt

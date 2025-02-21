@@ -5,7 +5,7 @@ services:
       - "8080:8080"
     environment:
       - DATABASE_HOST=db
-      - DATABASE_URL=jdbc:postgresql://db:5432/document_service
+      - DATABASE_URL=jdbc:postgresql://db:5432/document_control
       - DATABASE_USER=postgres
       - DATABASE_PASSWORD=postgres
       - POSTGRES_PASSWORD=postgres
@@ -21,10 +21,10 @@ services:
       start_period: 10s
 
   db:
-    image: postgres:14
+    image: postgres:16
     container_name: ${COMPOSE_PROJECT_NAME:-document-control-system}_db
     environment:
-      - POSTGRES_DB=document_service
+      - POSTGRES_DB=document_control
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
     ports:
@@ -32,7 +32,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d document_service"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d document_control"]
       interval: 5s
       timeout: 5s
       retries: 5

@@ -2,6 +2,8 @@ package com.doccontrol.document.domain
 
 import java.time.Instant
 import java.util.UUID
+import io.circe.{Encoder, Decoder}
+import io.circe.generic.semiauto._
 
 case class Document(
   id: UUID,
@@ -13,17 +15,7 @@ case class Document(
   updatedAt: Instant
 )
 
-case class DocumentType(
-  id: UUID,
-  name: String,
-  description: Option[String]
-)
-
-case class Revision(
-  id: UUID,
-  documentId: UUID,
-  version: String,
-  content: String,
-  createdAt: Instant,
-  createdBy: UUID // Person ID
-) 
+object Document {
+  implicit val encoder: Encoder[Document] = deriveEncoder[Document]
+  implicit val decoder: Decoder[Document] = deriveDecoder[Document]
+}

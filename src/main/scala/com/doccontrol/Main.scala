@@ -15,12 +15,16 @@ import pureconfig.generic.derivation.default._
 import com.doccontrol.document.repository.{DoobieDocumentRepository, DoobieRevisionRepository}
 import com.doccontrol.document.service.DocumentServiceImpl
 import com.doccontrol.document.api.DocumentRoutes
+import com.doccontrol.migration.FlywayMigrator
 
 object Main extends IOApp {
   
   def run(args: List[String]): IO[ExitCode] = {
     for {
       config <- IO.delay(ConfigSource.default.loadOrThrow[AppConfig])
+      
+      // Run migrations before starting the application
+      _ <- FlywayMigrator(config).migrate
       
       xa <- HikariTransactor.newHikariTransactor[IO](
         driverClassName = config.database.driver,

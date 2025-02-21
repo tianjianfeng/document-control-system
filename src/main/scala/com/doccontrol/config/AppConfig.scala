@@ -11,18 +11,15 @@ final case class ServerConfig(
 
 final case class DatabaseConfig(
   driver: String,
-  url: String,
   host: String,
   port: Int,
-  dbName: String,
+  name: String,
+  url: String,
   user: String,
   password: String,
   poolSize: Int,
   maxLifetime: FiniteDuration
-) derives ConfigReader {
-  def jdbcUrl: String = url
-}
-
+) derives ConfigReader
 
 final case class AppConfig(
   server: ServerConfig,
