@@ -16,6 +16,7 @@ import com.doccontrol.document.repository.{DoobieDocumentRepository, DoobieRevis
 import com.doccontrol.document.service.DocumentServiceImpl
 import com.doccontrol.document.api.DocumentRoutes
 import com.doccontrol.migration.FlywayMigrator
+import com.doccontrol.http.HealthRoutes
 
 object Main extends IOApp {
   
@@ -40,13 +41,13 @@ object Main extends IOApp {
       documentRoutes = new DocumentRoutes[IO](documentService)
       
       httpApp = Router(
-        "/api" -> documentRoutes.routes
+        "/api" -> (HealthRoutes.routes <+> documentRoutes.routes)
       ).orNotFound
       
       _ <- EmberServerBuilder
         .default[IO]
-        .withHost(Host.fromString("0.0.0.0").get)
-        .withPort(Port.fromInt(8080).get)
+        .withHost(Host.fromString(config.server.host).get)
+        .withPort(Port.fromInt(config.server.port).get)
         .withHttpApp(httpApp)
         .build
         .useForever
