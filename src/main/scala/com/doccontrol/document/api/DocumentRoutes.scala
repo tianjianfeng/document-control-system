@@ -13,17 +13,11 @@ import com.doccontrol.document.service.DocumentService
 import cats.effect.Async
 import cats.implicits._
 import org.http4s.circe.CirceEntityCodec.circeEntityDecoder
-
-
+import DocumentType._
+import Document._
+import Revision._
 
 class DocumentRoutes[F[_]: Async](documentService: DocumentService[F]) extends Http4sDsl[F] {
-  
-  implicit val documentEncoder: Encoder[Document] = deriveEncoder
-  implicit val documentDecoder: Decoder[Document] = deriveDecoder
-  implicit val documentTypeEncoder: Encoder[DocumentType] = deriveEncoder
-  implicit val documentTypeDecoder: Decoder[DocumentType] = deriveDecoder
-  implicit val revisionEncoder: Encoder[Revision] = deriveEncoder
-  implicit val revisionDecoder: Decoder[Revision] = deriveDecoder
   
   val routes: HttpRoutes[F] = HttpRoutes.of[F] {
     case req @ POST -> Root / "documents" =>
