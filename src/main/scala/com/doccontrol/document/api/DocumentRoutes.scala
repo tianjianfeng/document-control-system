@@ -14,6 +14,8 @@ import cats.effect.Async
 import cats.implicits._
 import org.http4s.circe.CirceEntityCodec.circeEntityDecoder
 
+
+
 class DocumentRoutes[F[_]: Async](documentService: DocumentService[F]) extends Http4sDsl[F] {
   
   implicit val documentEncoder: Encoder[Document] = deriveEncoder
@@ -27,12 +29,7 @@ class DocumentRoutes[F[_]: Async](documentService: DocumentService[F]) extends H
     case req @ POST -> Root / "documents" =>
       for {
         createReq <- req.as[CreateDocumentRequest]
-        document <- documentService.createDocument(
-          createReq.title,
-          createReq.description,
-          createReq.documentTypeId,
-          createReq.projectId
-        )
+        document <- documentService.createDocument(createReq)
         response <- Created(document.asJson)
       } yield response
       
@@ -50,13 +47,8 @@ class DocumentRoutes[F[_]: Async](documentService: DocumentService[F]) extends H
     case req @ POST -> Root / "document-types" =>
       for {
         createReq <- req.as[CreateDocumentTypeRequest]
-        docType = DocumentType(
-          id = UUID.randomUUID(),
-          name = createReq.name,
-          description = createReq.description
-        )
-        created <- documentService.createDocumentType(docType)
-        resp <- Created(created.asJson)
+        docType <- documentService.createDocumentType(createReq)
+        resp <- Created(docType.asJson)
       } yield resp
 
     case GET -> Root / "document-types" / UUIDVar(id) =>
