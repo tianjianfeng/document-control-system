@@ -8,6 +8,7 @@ trait RevisionRepository[F[_]] {
   def createRevision(revision: Revision): F[Revision]
   def getRevisions(documentId: UUID): F[List[Revision]]
   def getLatestRevision(documentId: UUID): F[Option[Revision]]
+  def getRevision(revisionId: UUID): F[Option[Revision]]
 }
 
 object RevisionRepository {

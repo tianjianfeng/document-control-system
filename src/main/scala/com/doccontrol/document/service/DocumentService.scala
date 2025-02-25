@@ -1,12 +1,12 @@
 package com.doccontrol.document.service
 
-import cats.effect.IO
+import cats.Monad
+import cats.syntax.all._
 import com.doccontrol.document.domain.{Document, DocumentType, Revision}
 import com.doccontrol.document.repository.{DocumentRepository, RevisionRepository}
 import java.util.UUID
 import java.time.Instant
-import com.doccontrol.document.model.CreateDocumentRequest
-import com.doccontrol.document.model.CreateDocumentTypeRequest
+import com.doccontrol.document.model.{CreateDocumentRequest, CreateDocumentTypeRequest}
 
 trait DocumentService[F[_]] {
   def createDocument(createReq: CreateDocumentRequest): F[Document]
@@ -18,16 +18,34 @@ trait DocumentService[F[_]] {
   def createRevision(revision: Revision): F[Revision]
   def getRevisions(documentId: UUID): F[List[Revision]]
   def getLatestRevision(documentId: UUID): F[Option[Revision]]
+  def getRevision(revisionId: UUID): F[Option[Revision]]
 }
 
-class DocumentServiceImpl[F[_]](
+class DocumentServiceImpl[F[_]: Monad](
   documentRepo: DocumentRepository[F],
   revisionRepo: RevisionRepository[F]
 ) extends DocumentService[F] {
   
   override def createDocument(createReq: CreateDocumentRequest): F[Document] = {
-    val document = Document.createDocument(createReq)
-    documentRepo.create(document)
+    val documentId = UUID.randomUUID()
+    val revisionId = UUID.randomUUID()
+
+    val document = Document.createDocument(createReq, documentId, revisionId)
+    
+    val initialRevision = Revision(
+      id = revisionId,
+      documentId = documentId,
+      version = "1.0",  // or whatever version scheme you're using
+      content = "",
+      createdAt = Instant.now(),
+      createdBy = createReq.userId
+    )
+    
+    // Use Monad to sequence the operations
+    for {
+      _ <- documentRepo.create(document)
+      _ <- revisionRepo.createRevision(initialRevision)
+    } yield document
   }
 
   override def getDocument(id: UUID): F[Option[Document]] = {
@@ -62,4 +80,9 @@ class DocumentServiceImpl[F[_]](
   override def getLatestRevision(documentId: UUID): F[Option[Revision]] = {
     revisionRepo.getLatestRevision(documentId)
   }
+
+  override def getRevision(revisionId: UUID): F[Option[Revision]] = {
+    revisionRepo.getRevision(revisionId)
+  }
+
 } 

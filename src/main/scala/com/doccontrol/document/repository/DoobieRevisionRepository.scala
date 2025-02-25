@@ -32,6 +32,13 @@ class DoobieRevisionRepository(xa: Transactor[IO]) extends RevisionRepository[IO
         ORDER BY created_at DESC
         LIMIT 1
       """.query[Revision]
+
+    def selectRevision(revisionId: UUID): Query0[Revision] =
+      sql"""
+        SELECT id, document_id, version, content, created_at, created_by
+        FROM revisions
+        WHERE id = $revisionId
+      """.query[Revision]
   }
 
   def createRevision(revision: Revision): IO[Revision] =
@@ -47,6 +54,11 @@ class DoobieRevisionRepository(xa: Transactor[IO]) extends RevisionRepository[IO
 
   def getLatestRevision(documentId: UUID): IO[Option[Revision]] =
     SQLQueries.selectLatestRevision(documentId)
+      .option
+      .transact(xa)
+
+  def getRevision(revisionId: UUID): IO[Option[Revision]] =
+    SQLQueries.selectRevision(revisionId)
       .option
       .transact(xa)
 }

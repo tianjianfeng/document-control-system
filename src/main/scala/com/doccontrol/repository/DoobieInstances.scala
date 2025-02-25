@@ -23,15 +23,17 @@ object DoobieInstances {
       Option[String], // description
       UUID,        // documentTypeId
       UUID,        // projectId
+      UUID,        // latestRevisionId
       Instant,     // createdAt
       Instant      // updatedAt
-    )].map { case (id, title, description, documentTypeId, projectId, createdAt, updatedAt) =>
+    )].map { case (id, title, description, documentTypeId, projectId, latestRevisionId, createdAt, updatedAt) =>
       Document(
         id = id,
         title = title,
         description = description,
         documentTypeId = documentTypeId,
         projectId = projectId,
+        latestRevisionId = latestRevisionId,
         createdAt = createdAt,
         updatedAt = updatedAt
       )

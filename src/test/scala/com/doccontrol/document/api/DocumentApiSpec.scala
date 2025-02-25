@@ -3,7 +3,7 @@ package com.doccontrol.document.api
 import cats.effect.IO
 import cats.effect.testing.scalatest.AsyncIOSpec
 import com.dimafeng.testcontainers.PostgreSQLContainer
-import com.doccontrol.document.domain.{Document, DocumentType}
+import com.doccontrol.document.domain.{Document, DocumentType, Revision}
 import com.doccontrol.document.model.{CreateDocumentRequest, CreateDocumentTypeRequest}
 import com.doccontrol.document.repository.{DoobieDocumentRepository, DoobieRevisionRepository}
 import com.doccontrol.document.service.DocumentServiceImpl
@@ -112,7 +112,8 @@ class DocumentApiSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers with 
               title = "Test Document",
               description = Some("Test Description"),
               documentTypeId = docType.id,
-              projectId = UUID.randomUUID()
+              projectId = UUID.randomUUID(),
+              userId = UUID.randomUUID()
             )
             
             createResponse <- app.run(
@@ -143,6 +144,22 @@ class DocumentApiSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers with 
             _ = getResponse.status shouldBe Status.Ok
             _ = retrievedDoc shouldBe createdDoc
             
+            // Get the revision
+            revisionResponse <- app.run(
+              Request[IO](
+                method = Method.GET,
+                uri = Uri.unsafeFromString(s"/documents/${createdDoc.id}/revisions/${createdDoc.latestRevisionId}")
+              )
+            )
+
+            revision <- revisionResponse.as[Revision]
+
+            // Verify revision
+            _ = revisionResponse.status shouldBe Status.Ok
+            _ = revision.id shouldBe createdDoc.latestRevisionId
+            _ = revision.documentId shouldBe createdDoc.id
+            _ = revision.version shouldBe "1.0"
+
             // Test not found case
             notFoundResponse <- app.run(
               Request[IO](

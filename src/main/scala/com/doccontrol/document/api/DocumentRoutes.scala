@@ -38,6 +38,12 @@ class DocumentRoutes[F[_]: Async](documentService: DocumentService[F]) extends H
         Ok(revisions.asJson)
       }
 
+    case GET -> Root / "documents" / UUIDVar(id) / "revisions" / UUIDVar(revisionId) =>
+      documentService.getRevision(revisionId).flatMap {
+        case Some(revision) => Ok(revision.asJson)
+        case None => NotFound()
+      }
+
     case req @ POST -> Root / "document-types" =>
       for {
         createReq <- req.as[CreateDocumentTypeRequest]

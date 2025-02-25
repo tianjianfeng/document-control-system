@@ -12,13 +12,39 @@ class DoobieDocumentRepository(xa: Transactor[IO]) extends DocumentRepository[IO
   object SQLQueries {
     def insertDocument(d: Document): Update0 =
       sql"""
-        INSERT INTO documents (id, title, description, document_type_id, project_id, created_at, updated_at)
-        VALUES (${d.id}, ${d.title}, ${d.description}, ${d.documentTypeId}, ${d.projectId}, ${d.createdAt}, ${d.updatedAt})
+        INSERT INTO documents (
+          id, 
+          title, 
+          description, 
+          document_type_id, 
+          project_id, 
+          latest_revision_id,
+          created_at, 
+          updated_at
+        )
+        VALUES (
+          ${d.id}, 
+          ${d.title}, 
+          ${d.description}, 
+          ${d.documentTypeId}, 
+          ${d.projectId}, 
+          ${d.latestRevisionId},
+          ${d.createdAt}, 
+          ${d.updatedAt}
+        )
       """.update
 
     def selectDocument(id: UUID): Query0[Document] =
       sql"""
-        SELECT id, title, description, document_type_id, project_id, created_at, updated_at
+        SELECT 
+          id, 
+          title, 
+          description, 
+          document_type_id, 
+          project_id,
+          latest_revision_id,
+          created_at, 
+          updated_at
         FROM documents
         WHERE id = $id
       """.query[Document]
@@ -26,7 +52,11 @@ class DoobieDocumentRepository(xa: Transactor[IO]) extends DocumentRepository[IO
     def updateDocument(d: Document): Update0 =
       sql"""
         UPDATE documents
-        SET title = ${d.title}, description = ${d.description}, updated_at = ${d.updatedAt}
+        SET 
+          title = ${d.title}, 
+          description = ${d.description}, 
+          latest_revision_id = ${d.latestRevisionId},
+          updated_at = ${d.updatedAt}
         WHERE id = ${d.id}
       """.update
 
@@ -38,7 +68,15 @@ class DoobieDocumentRepository(xa: Transactor[IO]) extends DocumentRepository[IO
 
     def listDocuments: Query0[Document] =
       sql"""
-        SELECT id, title, description, document_type_id, project_id, created_at, updated_at
+        SELECT 
+          id, 
+          title, 
+          description, 
+          document_type_id, 
+          project_id,
+          latest_revision_id,
+          created_at, 
+          updated_at
         FROM documents
       """.query[Document]
 

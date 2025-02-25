@@ -8,7 +8,8 @@ case class CreateDocumentRequest(
   title: String,
   description: Option[String],
   documentTypeId: UUID,
-  projectId: UUID
+  projectId: UUID,
+  userId: UUID
 )
 
 object CreateDocumentRequest {

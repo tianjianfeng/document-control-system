@@ -12,6 +12,7 @@ case class Document(
   description: Option[String],
   documentTypeId: UUID,
   projectId: UUID,
+  latestRevisionId: UUID,
   createdAt: Instant,
   updatedAt: Instant
 )
@@ -20,13 +21,14 @@ object Document {
   implicit val encoder: Encoder[Document] = deriveEncoder[Document]
   implicit val decoder: Decoder[Document] = deriveDecoder[Document]
 
-  def createDocument(createReq: CreateDocumentRequest): Document = {
+  def createDocument(createReq: CreateDocumentRequest, documentId: UUID, latestRevisionId: UUID): Document = {
     Document(
-      id = UUID.randomUUID(),
+      id = documentId,
       title = createReq.title,
       description = createReq.description,
       documentTypeId = createReq.documentTypeId,
       projectId = createReq.projectId,
+      latestRevisionId = latestRevisionId,
       createdAt = Instant.now,
       updatedAt = Instant.now
     )
